@@ -29,7 +29,8 @@ type Context struct {
 
 // Loader is an interface for loading kube config.
 type Loader interface {
-	Load(filename string) (*KubeConfig, error)
+	LoadFromFile(filename string) (*KubeConfig, error)
+	Load(content string) (*KubeConfig, error)
 }
 
 // FSLoaderOpt is an option for configuring FSLoader.
@@ -52,8 +53,8 @@ func NewFSLoader(options ...FSLoaderOpt) *FSLoader {
 	return l
 }
 
-// Load loads a kube config contexts from a list of files.
-func (l *FSLoader) Load(fileList string) (*KubeConfig, error) {
+// LoadFromFile loads a kube config contexts from a list of files.
+func (l *FSLoader) LoadFromFile(fileList string) (*KubeConfig, error) {
 	chain := strings.Deduplicate(filepath.SplitList(fileList))
 
 	loadingRules := &clientcmd.ClientConfigLoadingRules{
@@ -61,6 +62,30 @@ func (l *FSLoader) Load(fileList string) (*KubeConfig, error) {
 	}
 
 	config, err := loadingRules.Load()
+	if err != nil {
+		return nil, err
+	}
+
+	var list []Context
+
+	for name := range config.Contexts {
+		list = append(list, Context{Name: name})
+	}
+
+	sort.Slice(list, func(i, j int) bool {
+		return list[i].Name < list[j].Name
+	})
+
+	return &KubeConfig{
+		Contexts:       list,
+		CurrentContext: config.CurrentContext,
+	}, nil
+}
+
+// Load loads a kube config contexts from strings.
+func (l *FSLoader) Load(content string) (*KubeConfig, error) {
+	cc, err := clientcmd.NewClientConfigFromBytes([]byte(content))
+	config, err := cc.RawConfig()
 	if err != nil {
 		return nil, err
 	}

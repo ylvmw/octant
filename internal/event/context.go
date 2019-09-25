@@ -47,9 +47,7 @@ func NewContextsGenerator(dashConfig config.Dash, options ...ContextGeneratorOpt
 }
 
 func (g *ContextsGenerator) Event(ctx context.Context) (octant.Event, error) {
-	configPath := g.DashConfig.KubeConfigPath()
-
-	kubeConfig, err := g.ConfigLoader.Load(configPath)
+	kubeConfig, err := g.ConfigLoader.Load(g.DashConfig.KubeConfig())
 	if err != nil {
 		return octant.Event{}, errors.Wrap(err, "unable to load kube config")
 	}

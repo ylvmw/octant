@@ -10,7 +10,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"path/filepath"
 	"time"
 
 	"github.com/pkg/errors"
@@ -27,7 +26,6 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 
 	"github.com/vmware-tanzu/octant/internal/log"
-	"github.com/vmware-tanzu/octant/internal/util/strings"
 
 	// auth plugins
 	_ "k8s.io/client-go/plugin/pkg/client/auth/azure"
@@ -231,19 +229,13 @@ func (c *Cluster) Version() (string, error) {
 	return fmt.Sprint(serverVersion), nil
 }
 
-// FromKubeConfig creates a Cluster from a kubeConfig chain.
-func FromKubeConfig(ctx context.Context, kubeConfigList, contextName string, initialNamespace string, options RESTConfigOptions) (*Cluster, error) {
-	chain := strings.Deduplicate(filepath.SplitList(kubeConfigList))
-
-	rules := &clientcmd.ClientConfigLoadingRules{
-		Precedence: chain,
-	}
-
+// FromKubeConfig creates a Cluster from a kubeConfig content.
+func FromKubeConfig(ctx context.Context, kubeConfig, contextName string, initialNamespace string, options RESTConfigOptions) (*Cluster, error) {
 	overrides := &clientcmd.ConfigOverrides{}
 	if contextName != "" {
 		overrides.CurrentContext = contextName
 	}
-	cc := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(rules, overrides)
+	cc, err := clientcmd.NewClientConfigFromBytes([]byte(kubeConfig))
 	config, err := cc.ClientConfig()
 	if err != nil {
 		return nil, err

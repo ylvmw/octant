@@ -74,6 +74,7 @@ func newOctantCmd(version string) *cobra.Command {
 				options := dash.Options{
 					DisableClusterOverview: viper.GetBool("disable-cluster-overview"),
 					EnableOpenCensus:       viper.GetBool("enable-opencensus"),
+					KubeConfigPath:         viper.GetString("kubeconfigpath"),
 					KubeConfig:             viper.GetString("kubeconfig"),
 					Namespace:              viper.GetString("namespace"),
 					FrontendURL:            viper.GetString("ui-url"),
@@ -133,7 +134,8 @@ func newOctantCmd(version string) *cobra.Command {
 	octantCmd.Flags().StringP("context", "", "", "initial context")
 	octantCmd.Flags().BoolP("disable-cluster-overview", "", false, "disable cluster overview")
 	octantCmd.Flags().BoolP("enable-feature-applications", "", false, "enable applications feature")
-	octantCmd.Flags().String("kubeconfig", "", "absolute path to kubeConfig file")
+	octantCmd.Flags().String("kubeconfigpath", "", "absolute path to kubeConfig file")
+	octantCmd.Flags().String("kubeconfig", "", "raw content of kubeConfig file")
 	octantCmd.Flags().StringP("namespace", "n", "", "initial namespace")
 	octantCmd.Flags().StringP("plugin-path", "", "", "plugin path")
 	octantCmd.Flags().BoolP("verbose", "v", false, "turn on debug logging")

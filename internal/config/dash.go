@@ -92,6 +92,8 @@ type Dash interface {
 
 	KubeConfigPath() string
 
+	KubeConfig() string
+
 	UseContext(ctx context.Context, contextName string) error
 
 	ContextName() string
@@ -115,6 +117,7 @@ type Live struct {
 	portForwarder      portforward.PortForwarder
 	terminalManager    terminal.Manager
 	kubeConfigPath     string
+	kubeConfig         string
 	currentContextName string
 	restConfigOptions  cluster.RESTConfigOptions
 }
@@ -126,6 +129,7 @@ func NewLiveConfig(
 	clusterClient cluster.ClientInterface,
 	crdWatcher CRDWatcher,
 	kubeConfigPath string,
+	kubeConfig string,
 	logger log.Logger,
 	moduleManager module.ManagerInterface,
 	objectStore store.Store,
@@ -140,6 +144,7 @@ func NewLiveConfig(
 		clusterClient:      clusterClient,
 		crdWatcher:         crdWatcher,
 		kubeConfigPath:     kubeConfigPath,
+		kubeConfig:         kubeConfig,
 		logger:             logger,
 		moduleManager:      moduleManager,
 		objectStore:        objectStore,
@@ -187,6 +192,11 @@ func (l *Live) KubeConfigPath() string {
 	return l.kubeConfigPath
 }
 
+// KubeConfig returns the kube config content.
+func (l *Live) KubeConfig() string {
+	return l.kubeConfig
+}
+
 // Logger returns a logger.
 func (l *Live) Logger() log.Logger {
 	return l.logger
@@ -210,7 +220,7 @@ func (l *Live) TerminalManager() terminal.Manager {
 // UseContext switches context name. This process should have synchronously.
 func (l *Live) UseContext(ctx context.Context, contextName string) error {
 	// TODO: (GuessWhoSamFoo) FromKubeConfig needs a refactor. Initial ns is not needed when changing contexts (GH#362)
-	client, err := cluster.FromKubeConfig(ctx, l.kubeConfigPath, contextName, "", l.restConfigOptions)
+	client, err := cluster.FromKubeConfig(ctx, l.kubeConfig, contextName, "", l.restConfigOptions)
 	if err != nil {
 		return err
 	}

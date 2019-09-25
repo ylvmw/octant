@@ -28,6 +28,7 @@ import (
 type Options struct {
 	DashConfig     config.Dash
 	KubeConfigPath string
+	KubeConfig     string
 }
 
 type Configuration struct {

@@ -50,6 +50,7 @@ import (
 type Options struct {
 	EnableOpenCensus       bool
 	DisableClusterOverview bool
+	KubeConfigPath         string
 	KubeConfig             string
 	Namespace              string
 	FrontendURL            string
@@ -158,6 +159,7 @@ func Run(ctx context.Context, logger log.Logger, shutdownCh chan bool, options O
 	dashConfig := config.NewLiveConfig(
 		clusterClient,
 		crdWatcher,
+		options.KubeConfigPath,
 		options.KubeConfig,
 		logger,
 		moduleManager,
@@ -308,6 +310,7 @@ func initModules(ctx context.Context, dashConfig config.Dash, namespace string, 
 	configurationOptions := configuration.Options{
 		DashConfig:     dashConfig,
 		KubeConfigPath: dashConfig.KubeConfigPath(),
+		KubeConfig:     dashConfig.KubeConfig(),
 	}
 	configurationModule := configuration.New(ctx, configurationOptions)
 
